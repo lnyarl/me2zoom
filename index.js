@@ -52,7 +52,13 @@ var getPhotoSizePosition = function(e) {
 };
 
 var movePhoto = function(e){
+	e.stopPropagation();
 	var size_position = getPhotoSizePosition(e);
+	if(photo.children().length == 0) {
+		return;
+	}else if(photo.children().length >= 1){
+		showPhoto(size_position);
+	}
 	photo.css({'top': size_position.y , 'left': size_position.x});
 	if(photo.find('.'+loadingimage_class).length >= 1) {
 		photo.css({'width': '16px',
@@ -63,18 +69,30 @@ var movePhoto = function(e){
 	}
 };
 
+var showPhoto = function(pos_size) {
+	if(photo.children().length == 0) return;
+	photo.css('z-index', 100000);
+	photo.css('display', 'block');
+	photo.css('top', pos_size.y);
+	photo.css('left', pos_size.x);
+	photo.css('width', pos_size.width);
+	photo.css('height', pos_size.height);
+}
+
 var zoomPhoto = function(e) {
-	console.log(e);
-	if(photo.children().length >= 1) return;
+	if(photo.children().length >= 1) {
+		return;
+	}
 	var pos = getMousePosition(e);
 	var href = $(this).attr('href');
 	photo.append('<img class="' + loadingimage_class + '" src="http://me2day.net/images/indicator_snake.gif">');
-	photo.css('top', pos.y);
-	photo.css('left', pos.x);
-	photo.css('width', '16px');
-	photo.css('height', '16px');
-	photo.css('z-index', 100000);
-	photo.css('display', 'block');
+	showPhoto({x : pos.y, y : pos.y, width : '16px', height : '16px'});
+
+	if(!href || href.indexOf('me2day.net/front/me2photo') < 0) {
+		removePhoto(e);
+		return;
+	}
+
 	$.get(href, function(data){
 		//var innerhref = $(data).find('div a').attr('href');
 		//if(!innerhref || innerhref == "") return;
@@ -84,6 +102,10 @@ var zoomPhoto = function(e) {
 		img.load(function(){
 			photo.children().remove();
 			photo.append(img);
+			if(img.width() + img.height() == 0) {
+				removePhoto(e);
+				return;
+			}
 			original_size.width = img.width() + padding*2;
 			original_size.height = img.height() + padding*2;
 			photo.css('width', original_size.width);
@@ -91,10 +113,7 @@ var zoomPhoto = function(e) {
 			img.css('width', '100%');
 			img.css('height', '100%');
 			var size_position = getPhotoSizePosition(e);
-			photo.css({'top': size_position.y, 
-					'left': size_position.x});
-			photo.css({'width': size_position.width,
-					'height': size_position.height});
+			showPhoto(size_position);
 		});
 	});
 };
@@ -122,9 +141,11 @@ var registryZoomEvent = function(){
 	var iconlist = $('.icons_slt a.icons_link:has(.me2photo)');
 	photo.mousemove(movePhoto); 
 	iconlist.live('mouseover',zoomPhoto)
+			.live('mouseenter',zoomPhoto)
 			.live('mousemove',movePhoto)
-			.live('mouseleave',removePhoto); 
-	$(document).mouseenter(removePhoto); 
+			.live('mouseleave',removePhoto)
+			.live('mouseout',removePhoto); 
+	$(document).mousemove(removePhoto);
 
 	$('.profile_master .action_link').live('mouseover', hideNameText)
 					.live('mouseleave', showNameText);
