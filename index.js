@@ -155,23 +155,8 @@ var registryZoomEvent = function() {
 					.live('mouseleave', showNameText);
 };
 
-var checkIconIncreasement = function(iconlist) {
-	if(iconlist.length != icon_count) {
-		icon_count = iconlist.length;
-		return true;
-	} else {
-		return false;
-	}
-};
-
 var init = function() {
 	registryZoomEvent();
-
-	var get_mystream_link = $("#get_mystream_link");
-	get_mystream_link.click(function(){
-		//registryZoomEvent();
-		return false;
-	});
 }
 
 init();
