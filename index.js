@@ -80,6 +80,7 @@ var showPhoto = function(pos_size) {
 }
 
 var zoomPhoto = function(e) {
+	e.stopPropagation();
 	if(photo.children().length >= 1) {
 		return;
 	}
@@ -88,7 +89,7 @@ var zoomPhoto = function(e) {
 	photo.append('<img class="' + loadingimage_class + '" src="http://me2day.net/images/indicator_snake.gif">');
 	showPhoto({x : pos.y, y : pos.y, width : '16px', height : '16px'});
 
-	if(!href || href.indexOf('me2day.net/front/me2photo') < 0) {
+	if(!href || href.match(/me2day\.net\/.*\/me2photo/) < 0) {
 		removePhoto(e);
 		return;
 	}
@@ -119,6 +120,7 @@ var zoomPhoto = function(e) {
 };
 
 var removePhoto = function(e) {
+	e.stopPropagation();
 	photo.css('width', 0);
 	photo.css('height', 0);
 	photo.css('top', 0);
@@ -137,7 +139,7 @@ showNameText = function(e) {
 	$(this).parent().find('.friend_text').show();
 };
 
-var registryZoomEvent = function(){
+var registryZoomEvent = function() {
 	var iconlist = $('.icons_slt a.icons_link:has(.me2photo)');
 	photo.mousemove(movePhoto); 
 	iconlist.live('mouseover',zoomPhoto)
@@ -151,7 +153,7 @@ var registryZoomEvent = function(){
 					.live('mouseleave', showNameText);
 	$('.profile_master .image_box').live('mouseover', hideNameText)
 					.live('mouseleave', showNameText);
-}
+};
 
 var checkIconIncreasement = function(iconlist) {
 	if(iconlist.length != icon_count) {
@@ -160,7 +162,7 @@ var checkIconIncreasement = function(iconlist) {
 	} else {
 		return false;
 	}
-}
+};
 
 var init = function() {
 	registryZoomEvent();
