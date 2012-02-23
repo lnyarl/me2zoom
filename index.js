@@ -89,7 +89,7 @@ var zoomPhoto = function(e) {
 	photo.append('<img class="' + loadingimage_class + '" src="http://me2day.net/images/indicator_snake.gif">');
 	showPhoto({x : pos.y, y : pos.y, width : '16px', height : '16px'});
 
-	if(!href || href.match(/me2day\.net\/.*\/me2photo/) < 0) {
+	if(!href) {
 		removePhoto(e);
 		return;
 	}
@@ -97,9 +97,9 @@ var zoomPhoto = function(e) {
 	$.get(href, function(data){
 		//var innerhref = $(data).find('div a').attr('href');
 		//if(!innerhref || innerhref == "") return;
-		var img = $(data).find('div a img');//$('<img />');
+		var img = $(data).find('img:first');//$('<img />');
 		//img.attr('src', innerhref);
-
+		
 		img.load(function(){
 			photo.children().remove();
 			photo.append(img);
@@ -140,7 +140,7 @@ showNameText = function(e) {
 };
 
 var registryZoomEvent = function() {
-	var iconlist = $('.icons_slt a.icons_link:has(.me2photo)');
+	var iconlist = $('.icons_slt a.icons_link');
 	photo.mousemove(movePhoto); 
 	iconlist.live('mouseover',zoomPhoto)
 			.live('mouseenter',zoomPhoto)
