@@ -1,12 +1,12 @@
-icon_count = 0;
+var icon_count = 0;
 var photo = $('<div id="zoomphoto" style="border:1px solid #555; padding:10px; background-color:#fff; -webkit-box-shadow:0px 0px 30px #666; display:none;"></div>');
 photo.css('position', 'absolute');
 photo.css('z-index', -100000);
 $('body').append(photo);
 
-original_size = {width:0, height:0};
-padding = 10;
-loadingimage_class = "loadingimage";
+var original_size = {width:0, height:0};
+var padding = 10;
+var loadingimage_class = "loadingimage";
 
 var getMousePosition = function(e) {
 	var posx = 0;
@@ -69,8 +69,10 @@ var movePhoto = function(e){
 	}
 };
 
+
 var showPhoto = function(pos_size) {
 	if(photo.children().length == 0) return;
+	if(photo.children().length > 1) photo.find('img:last-child').siblings().remove();
 	photo.css('z-index', 100000);
 	photo.css('display', 'block');
 	photo.css('top', pos_size.y);
@@ -95,10 +97,7 @@ var zoomPhoto = function(e) {
 	}
 
 	$.get(href, function(data){
-		//var innerhref = $(data).find('div a').attr('href');
-		//if(!innerhref || innerhref == "") return;
-		var img = $(data).find('img:first');//$('<img />');
-		//img.attr('src', innerhref);
+		var img = $('<div>').append(data).find('img:last');
 		
 		img.load(function(){
 			photo.children().remove();
@@ -107,12 +106,19 @@ var zoomPhoto = function(e) {
 				removePhoto(e);
 				return;
 			}
+
 			original_size.width = img.width() + padding*2;
 			original_size.height = img.height() + padding*2;
-			photo.css('width', original_size.width);
-			photo.css('height', original_size.height);
-			img.css('width', '100%');
-			img.css('height', '100%');
+
+			photo.css({
+				'width': original_size.width,
+				'height': original_size.height
+				});
+			img.css({
+				'width':'100%',
+				'height': '100%'
+				});
+
 			var size_position = getPhotoSizePosition(e);
 			showPhoto(size_position);
 		});
@@ -131,13 +137,37 @@ var removePhoto = function(e) {
 	original_size = {width:0, height:0};
 };
 
-hideNameText = function(e) {
+var showNameText = function(e) {
+	$(this).parent().find('.friend_text').show();
+};
+
+var hideNameText = function(e) {
 	$(this).parent().find('.friend_text').hide();
 };
 
-showNameText = function(e) {
-	$(this).parent().find('.friend_text').show();
+var deleteProfile = function() {
+	$('.sec_post:not(.arranged)')
+	.addClass('arranged')
+		.find('.post_section')
+		.css({
+			'margin-left' : '15px',
+			'margin-top' : '12px'
+		}).end()
+		.find('.profile_master')
+		.css({
+			'margin-top' : '0px',
+			'height' : '19px'
+		})
+			.find('.friend_text').siblings().remove();
 };
+
+var arrangeIcon = function(sec_post) {
+	
+};
+
+var disableDiscoveryView = function() {
+	$('.sec_post .discovery').removeClass('discovery');
+}
 
 var registryZoomEvent = function() {
 	var iconlist = $('.icons_slt a.icons_link');
@@ -149,9 +179,11 @@ var registryZoomEvent = function() {
 			.live('mouseout',removePhoto); 
 	$(document).mousemove(removePhoto);
 
-	$('.profile_master .action_link').live('mouseover', hideNameText)
-					.live('mouseleave', showNameText);
-	$('.profile_master .image_box').live('mouseover', hideNameText)
+	// 나중에 쓸꺼임
+	//disableDiscoveryView();
+	//deleteProfile();
+
+	$('.profile_master .action_link, .image_box').live('mouseover', hideNameText)
 					.live('mouseleave', showNameText);
 };
 
