@@ -97,7 +97,7 @@ var zoomPhoto = function(e) {
 	}
 
 	$.get(href, function(data){
-		var img = $('<div>').append(data).find('img:last');
+		var img = $(data).find('img:last');
 		
 		img.load(function(){
 			photo.children().remove();
