@@ -97,7 +97,11 @@ var zoomPhoto = function(e) {
 	}
 
 	$.get(href, function(data){
-		var img = $(data).find('img:last');
+		var img = $(data).find('#post_photo img:last');
+		
+		if(img.length == 0) {
+			img = $(data).find('.archive_link img:first');
+		}
 		
 		img.load(function(){
 			photo.children().remove();
@@ -170,7 +174,7 @@ var disableDiscoveryView = function() {
 }
 
 var registryZoomEvent = function() {
-	var iconlist = $('.icons_slt a.icons_link');
+	var iconlist = $('.post_sentiment a.me2photo');
 	photo.mousemove(movePhoto); 
 	iconlist.live('mouseover',zoomPhoto)
 			.live('mouseenter',zoomPhoto)

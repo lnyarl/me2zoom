@@ -1,5 +1,6 @@
 {
   "name": "me2zoom",
+  "manifest_version": 2,
   "icons": {
     "128": "icon_128.png"
   },
@@ -10,6 +11,6 @@
 	  "all_frames" : true
     }
   ],
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "미투데이의 미투포토를 쉽게 보여주는 확장기능"
 }
