@@ -81,7 +81,9 @@ var showPhoto = function(pos_size) {
 	photo.css('height', pos_size.height);
 }
 
-var getPhoto = function(hrea, e) {
+var retryCount = 0;
+var getPhoto = function(href, elem, e) {
+	retryCount++;
 	$.ajax({
 		type: 'POST',
 		url : href, 
@@ -94,12 +96,19 @@ var getPhoto = function(hrea, e) {
 			var img = $(data).find('#post_photo img:last');
 			
 			if(img.length == 0) {
-				img = $(data).find('.archive_link img:first');
+				img = $(data).find('img.archive_image');
+			}
+			if(img.length == 0 && retryCount < 5) {
+				href = $(elem).attr('href');
+				getPhoto(href, elem, e);
+				return;
 			}
 			if(img.length == 0) {
-				img = $(data);
+				removePhoto(e);
+				return;
 			}
 			
+			retryCount = 0;
 			img.load(function(){
 				photo.children().remove();
 				photo.append(img);
@@ -131,7 +140,10 @@ var getPhoto = function(hrea, e) {
 	});
 }
 
-var href = '';
+var mouseOverHref = '';
+var getHref = function(t) {
+	return $(t).parent().parent().find('.date_time').attr('href');
+}
 var zoomPhoto = function(e) {
 	e.stopPropagation();
 	if(photo.children().length >= 1) {
@@ -139,7 +151,8 @@ var zoomPhoto = function(e) {
 	}
 
 	var pos = getMousePosition(e);
-	href = $(this).attr('href');
+	mouseOverHref = $(this).attr('href');
+	var href = getHref(this);
 	
 	photo.append('<img class="' + loadingimage_class + '" src="http://me2day.net/images/indicator_snake.gif">');
 	showPhoto({x : pos.y, y : pos.y, width : '16px', height : '16px'});
@@ -149,12 +162,14 @@ var zoomPhoto = function(e) {
 		return;
 	}
 
-	getPhoto(href, e);
+	getPhoto(href, this, e);
+
 };
 
 var removePhoto = function(e) {
 	e.stopPropagation();
-	if(href == $(this).attr('href')) {
+	//if(!$(this).attr('class') || $(this).attr('class').indexOf('me2photo') < 0) return;
+	if(mouseOverHref == $(this).attr('href')) {
 		return;
 	}
 	photo.css('width', 0);
@@ -165,7 +180,7 @@ var removePhoto = function(e) {
 	photo.css('display', 'none');
 	photo.children().remove();
 	original_size = {width:0, height:0};
-	href = '';
+	mouseOverHref = '';
 };
 
 var disableDiscoveryView = function() {
@@ -181,13 +196,6 @@ var registryZoomEvent = function() {
 			.live('mouseleave',removePhoto)
 			.live('mouseout',removePhoto); 
 	$(document).mousemove(removePhoto);
-
-	// 나중에 쓸꺼임
-	//disableDiscoveryView();
-	//deleteProfile();
-
-	$('.profile_master .action_link, .image_box').live('mouseover', hideNameText)
-					.live('mouseleave', showNameText);
 };
 
 var init = function() {
