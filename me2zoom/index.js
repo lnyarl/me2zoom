@@ -81,13 +81,66 @@ var showPhoto = function(pos_size) {
 	photo.css('height', pos_size.height);
 }
 
+var getPhoto = function(hrea, e) {
+	$.ajax({
+		type: 'POST',
+		url : href, 
+		success : function(data){
+ 			if (data.redirect) {
+            			getPhoto(data.redirect);
+				return;
+        		}
+			
+			var img = $(data).find('#post_photo img:last');
+			
+			if(img.length == 0) {
+				img = $(data).find('.archive_link img:first');
+			}
+			if(img.length == 0) {
+				img = $(data);
+			}
+			
+			img.load(function(){
+				photo.children().remove();
+				photo.append(img);
+				if(img.width() + img.height() == 0) {
+					removePhoto(e);
+					return;
+				}
+
+				original_size.width = img.width() + padding*2;
+				original_size.height = img.height() + padding*2;
+
+				photo.css({
+					'width': original_size.width,
+					'height': original_size.height
+					});
+				img.css({
+					'width':'100%',
+					'height': '100%',
+					'box-shadow' : 'rgba(0, 0, 0, 0) 0px 0px 0px'
+					});
+
+				var size_position = getPhotoSizePosition(e);
+				showPhoto(size_position);
+			});
+		},
+		error : function() {
+			//removePhoto(e);
+		}
+	});
+}
+
+var href = '';
 var zoomPhoto = function(e) {
 	e.stopPropagation();
 	if(photo.children().length >= 1) {
 		return;
 	}
+
 	var pos = getMousePosition(e);
-	var href = $(this).attr('href');
+	href = $(this).attr('href');
+	
 	photo.append('<img class="' + loadingimage_class + '" src="http://me2day.net/images/indicator_snake.gif">');
 	showPhoto({x : pos.y, y : pos.y, width : '16px', height : '16px'});
 
@@ -96,41 +149,14 @@ var zoomPhoto = function(e) {
 		return;
 	}
 
-	$.get(href, function(data){
-		var img = $(data).find('#post_photo img:last');
-		
-		if(img.length == 0) {
-			img = $(data).find('.archive_link img:first');
-		}
-		
-		img.load(function(){
-			photo.children().remove();
-			photo.append(img);
-			if(img.width() + img.height() == 0) {
-				removePhoto(e);
-				return;
-			}
-
-			original_size.width = img.width() + padding*2;
-			original_size.height = img.height() + padding*2;
-
-			photo.css({
-				'width': original_size.width,
-				'height': original_size.height
-				});
-			img.css({
-				'width':'100%',
-				'height': '100%'
-				});
-
-			var size_position = getPhotoSizePosition(e);
-			showPhoto(size_position);
-		});
-	});
+	getPhoto(href, e);
 };
 
 var removePhoto = function(e) {
 	e.stopPropagation();
+	if(href == $(this).attr('href')) {
+		return;
+	}
 	photo.css('width', 0);
 	photo.css('height', 0);
 	photo.css('top', 0);
@@ -139,34 +165,7 @@ var removePhoto = function(e) {
 	photo.css('display', 'none');
 	photo.children().remove();
 	original_size = {width:0, height:0};
-};
-
-var showNameText = function(e) {
-	$(this).parent().find('.friend_text').show();
-};
-
-var hideNameText = function(e) {
-	$(this).parent().find('.friend_text').hide();
-};
-
-var deleteProfile = function() {
-	$('.sec_post:not(.arranged)')
-	.addClass('arranged')
-		.find('.post_section')
-		.css({
-			'margin-left' : '15px',
-			'margin-top' : '12px'
-		}).end()
-		.find('.profile_master')
-		.css({
-			'margin-top' : '0px',
-			'height' : '19px'
-		})
-			.find('.friend_text').siblings().remove();
-};
-
-var arrangeIcon = function(sec_post) {
-	
+	href = '';
 };
 
 var disableDiscoveryView = function() {
